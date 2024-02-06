@@ -1,4 +1,5 @@
 Global / scalaVersion := "3.3.0"
+Global / run / fork := true
 
 lazy val kernel = project.in(file("modules/kernel"))
 
@@ -25,6 +26,10 @@ lazy val backend = project
   .dependsOn(kernel)
   .settings(
     libraryDependencies ++= Seq(
-      "co.fs2" %% "fs2-core" % "3.9.4"
+      "co.fs2" %% "fs2-io" % "3.9.4"
     )
   )
+
+lazy val test = project
+  .in(file("modules/test"))
+  .dependsOn(frontend, backend)

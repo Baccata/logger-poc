@@ -63,3 +63,11 @@ abstract class Logger[F[_]] extends LoggerKernel[F] {
   }
 
 }
+
+object Logger {
+
+  def wrap[F[_]](kernel: LoggerKernel[F]): Logger[F] = new Logger[F] {
+    def log(record: Log => Log): F[Unit] = kernel.log(record)
+  }
+
+}

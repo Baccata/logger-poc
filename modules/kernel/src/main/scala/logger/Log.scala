@@ -2,6 +2,7 @@ package logger
 
 import scala.collection.{Map => MapLike}
 import scala.collection.mutable.{Map => MMap}
+import scala.concurrent.duration.FiniteDuration
 
 /** Low-level interface exposing methods to enrich a log record with relevant
   * information. The methods are designed to capture elements that cannot be
@@ -10,6 +11,7 @@ import scala.collection.mutable.{Map => MMap}
   */
 trait Log {
 
+  def timestamp: Option[FiniteDuration]
   def level: LogLevel
   def levelValue: Double
   def message: String
@@ -23,6 +25,7 @@ trait Log {
   def unsafeThrowable: Throwable
   def unsafeContext: MapLike[String, Context]
 
+  def withTimestamp(value: FiniteDuration): Log
   def withLevel(level: LogLevel): Log
   def withLevelValue(levelValue: Double): Log
   def withMessage(message: => String): Log
@@ -44,26 +47,15 @@ trait Log {
 
 object Log {
 
-  case class Immutable private (
-      level: LogLevel,
-      levelValue: Double,
-      message: String,
-      throwable: Throwable,
-      context: MMap[String, Context],
-      fileName: String,
-      className: String,
-      methodName: String,
-      line: Int
-  )
+  def mutable(): Log = new MutableBuilder()
 
-  def mutableBuilder(): Log = new MutableBuilder()
+  private class MutableBuilder private[Log] () extends Log {
 
-  class MutableBuilder private[Log] () extends Log {
-
-    def level: LogLevel = if (level == null) LogLevel.Debug else level
+    def timestamp: Option[FiniteDuration] = Option(_timestamp)
+    def level: LogLevel = if (_level == null) LogLevel.Debug else _level
     def levelValue: Double =
-      if (_levelValue < 0) LogLevel.Debug.value else levelValue
-    def message: String = if (message == null) "" else message
+      if (_levelValue < 0) level.value else _levelValue
+    def message: String = if (_message == null) "" else _message
     def throwable: Option[Throwable] = Option(_throwable)
     def context: Map[String, Context] =
       if (_context == null) Map.empty else _context.toMap
@@ -76,6 +68,7 @@ object Log {
     def unsafeThrowable: Throwable = _throwable
     def unsafeContext: MapLike[String, Context] = _context
 
+    private var _timestamp: FiniteDuration = null
     private var _level: LogLevel = null
     private var _levelValue: Double = -1
     private var _message: String = null
@@ -86,9 +79,13 @@ object Log {
     private var _methodName: String = null
     private var _line: Int = -1
 
+    def withTimestamp(value: FiniteDuration): this.type = {
+      this._timestamp = value
+      this
+    }
+
     def withLevel(level: LogLevel): this.type = {
       this._level = level
-      this._levelValue = level.value
       this
     }
 

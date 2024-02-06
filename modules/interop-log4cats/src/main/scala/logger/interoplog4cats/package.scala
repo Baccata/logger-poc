@@ -52,7 +52,7 @@ package object interoplog4cats {
 
   def log4catsFrontend[F[_]](logger: StructuredLogger[F]): LoggerKernel[F] = new LoggerKernel[F] {
     def log(record: Log => Log): F[Unit] = {
-      val log = record(Log.mutableBuilder())
+      val log = record(Log.mutable())
       val ctx = log.unsafeContext
       val log4catsContext = locally {
         if (ctx != null) {

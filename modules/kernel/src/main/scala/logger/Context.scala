@@ -1,5 +1,7 @@
 package logger
 
+import scala.concurrent.duration.FiniteDuration
+
 /** A value that can be written into a json-like construct, provided a visitor.
   */
 trait Context {
@@ -21,6 +23,12 @@ object Context {
     implicit val intEncoder: Encoder[Int] = new Encoder[Int] {
       def encode[J](json: JsonLike.Aux[J], a: Int) = json.int(a)
     }
+
+    implicit val timestampEncoder: Encoder[FiniteDuration] =
+      new Encoder[FiniteDuration] {
+        def encode[J](json: JsonLike.Aux[J], a: FiniteDuration) =
+          json.timestamp(a)
+      }
   }
 
   implicit def toContext[A: Encoder](a: A): Context =

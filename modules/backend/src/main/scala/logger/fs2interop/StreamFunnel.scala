@@ -12,7 +12,11 @@ import fs2.concurrent.Channel
 
 import scala.concurrent.duration.FiniteDuration
 
-// Courtesy of @daddykotex and @systemfw
+/** Courtesy of @systemfw
+  *
+  * Multiple-producers, single-consumer bounded queue that has a graceful
+  * closure that waits a certain duration before terminating consumption.
+  */
 object StreamFunnel {
   def apply[F[_]: Async, T](
       capacity: Int,

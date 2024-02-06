@@ -11,8 +11,8 @@ trait LogRecord extends (Log => Log)
 object LogRecord {
   def combine(all: Seq[LogRecord]): LogRecord = Combined(all)
 
-  implicit def toLogRecord[A: Loggable](value: => A): LogRecord =
-    Loggable[A].record(value)
+  implicit def toLogRecord[A: Recordable](value: => A): LogRecord =
+    Recordable[A].record(value)
 
   private case class Combined(all: Seq[LogRecord]) extends LogRecord {
     def apply(record: Log): Log = {
