@@ -27,7 +27,7 @@ object Main extends IOApp {
             _.withLevel(LogLevel.Warn)
               .withMessage("hello")
               .withContext("string")("some_string")
-              .withContext("baz")(1)
+              .withContext("int")(1)
               .withThrowable(new Exception("BOOM"))
           )
 
@@ -40,8 +40,8 @@ object Main extends IOApp {
         // the log statement was issued (classname, file, line).
         val higherLevelLoggerCall = logger.info(
           "hello",
-          "foo" -> "string",
-          "baz" -> 1,
+          "string" -> "some_string",
+          "int" -> 1,
           new Exception("KABOOM")
         )
         loggerKernelCall *> higherLevelLoggerCall
