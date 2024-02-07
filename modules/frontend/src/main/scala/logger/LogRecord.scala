@@ -6,7 +6,7 @@ package logger
   * This allows for an interesting UX, where the details of the encoding of some
   * data into a log can be separate from the actual log statements.
   */
-trait LogRecord extends (Log => Log)
+trait LogRecord extends (Log.Builder => Log.Builder)
 
 object LogRecord {
   def combine(all: Seq[LogRecord]): LogRecord = Combined(all)
@@ -15,7 +15,7 @@ object LogRecord {
     Recordable[A].record(value)
 
   private case class Combined(all: Seq[LogRecord]) extends LogRecord {
-    def apply(record: Log): Log = {
+    def apply(record: Log.Builder): Log.Builder = {
       var current = record
       all.foreach { logBit =>
         current = logBit(current)

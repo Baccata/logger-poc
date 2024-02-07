@@ -20,7 +20,7 @@ object Recordable {
 
       override def record(value: => (String, T)): LogRecord = {
         val (k, v) = value
-        (_: Log).withContext(k)(v)
+        (_: Log.Builder).withContext(k)(v)
       }
 
     }

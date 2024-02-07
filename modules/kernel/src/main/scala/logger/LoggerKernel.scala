@@ -22,5 +22,5 @@ package logger
   * imposing
   */
 trait LoggerKernel[F[_]] {
-  def log(record: Log => Log): F[Unit]
+  def log(record: Log.Builder => Log.Builder): F[Unit]
 }

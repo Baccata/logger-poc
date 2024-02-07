@@ -49,7 +49,7 @@ abstract class Logger[F[_]] extends LoggerKernel[F] {
       name: sourcecode.Name,
       line: sourcecode.Line
   ): F[Unit] = {
-    log((record: Log) =>
+    log((record: Log.Builder) =>
       LogRecord.combine(others)(
         bit(
           record
@@ -67,7 +67,7 @@ abstract class Logger[F[_]] extends LoggerKernel[F] {
 object Logger {
 
   def wrap[F[_]](kernel: LoggerKernel[F]): Logger[F] = new Logger[F] {
-    def log(record: Log => Log): F[Unit] = kernel.log(record)
+    def log(record: Log.Builder => Log.Builder): F[Unit] = kernel.log(record)
   }
 
 }

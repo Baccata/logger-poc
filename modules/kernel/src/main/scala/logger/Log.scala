@@ -25,31 +25,39 @@ trait Log {
   def unsafeThrowable: Throwable
   def unsafeContext: MapLike[String, Context]
 
-  def withTimestamp(value: FiniteDuration): Log
-  def withLevel(level: LogLevel): Log
-  def withLevelValue(levelValue: Double): Log
-  def withMessage(message: => String): Log
-  def withThrowable(throwable: Throwable): Log
-  def withContext(name: String)(f: Context): Log
-  def withFileName(name: String): Log
-  def withClassName(name: String): Log
-  def withLine(line: Int): Log
-
-  final def withContextMap[A: Context.Encoder](mdc: Map[String, A]): Log = {
-    var log = this
-    mdc.foreach { case (k, v) =>
-      log = withContext(k)(v)
-    }
-    log
-  }
-
 }
 
 object Log {
 
-  def mutable(): Log = new MutableBuilder()
+  trait Builder {
+    def withTimestamp(value: FiniteDuration): Builder
+    def withLevel(level: LogLevel): Builder
+    def withLevelValue(levelValue: Double): Builder
+    def withMessage(message: => String): Builder
+    def withThrowable(throwable: Throwable): Builder
+    def withContext(name: String)(f: Context): Builder
+    def withFileName(name: String): Builder
+    def withClassName(name: String): Builder
+    def withLine(line: Int): Builder
 
-  private class MutableBuilder private[Log] () extends Log {
+    final def withContextMap[A: Context.Encoder](
+        mdc: Map[String, A]
+    ): Builder = {
+      var builder = this
+      mdc.foreach { case (k, v) =>
+        builder = withContext(k)(v)
+      }
+      builder
+    }
+
+    def build(): Log
+  }
+
+  def mutableBuilder(): Builder = new MutableBuilder()
+
+  private class MutableBuilder private[Log] () extends Builder with Log {
+
+    def build(): Log = this
 
     def timestamp: Option[FiniteDuration] = Option(_timestamp)
     def level: LogLevel = if (_level == null) LogLevel.Debug else _level

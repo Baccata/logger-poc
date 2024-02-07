@@ -15,21 +15,36 @@ object Main extends IOApp {
       .map(AddTimestamp(_))
       .map(Logger.wrap(_))
       .use { logger =>
-        summon[Context.Encoder[String]]
-
-        logger.warn(
-          _.withLevel(LogLevel.Warn)
-            .withMessage("hello")
-            .withContext("string")("some_string")
-            .withContext("baz")(1)
-            .withThrowable(new Exception("BOOM"))
-        ) *>
-          logger.info(
-            "hello",
-            "foo" -> "string",
-            "baz" -> 1,
-            new Exception("KABOOM")
+        // This is a direct call to the logger kernel interface.
+        // The user is expected to provide a function to add information
+        // to some log builder.
+        //
+        // This is applying inversion of control so that the
+        // LoggerKernel implementation can decide on the memory layout
+        // of the data.
+        val loggerKernelCall = logger
+          .warn(
+            _.withLevel(LogLevel.Warn)
+              .withMessage("hello")
+              .withContext("string")("some_string")
+              .withContext("baz")(1)
+              .withThrowable(new Exception("BOOM"))
           )
+
+        // This showcases a higher level UX, using a varargs-taking methods
+        // combined with the "typeclassed" pattern in order to capture the same
+        // information in a more concise way.
+        //
+        // Additionally, the higher-level interface depends on Haoyi's Sourcecode
+        // library, automating the capture of information about where
+        // the log statement was issued (classname, file, line).
+        val higherLevelLoggerCall = logger.info(
+          "hello",
+          "foo" -> "string",
+          "baz" -> 1,
+          new Exception("KABOOM")
+        )
+        loggerKernelCall *> higherLevelLoggerCall
       }
       .as(ExitCode.Success)
 }
