@@ -23,7 +23,7 @@ object Main extends IOApp {
         // LoggerKernel implementation can decide on the memory layout
         // of the data.
         val loggerKernelCall = logger
-          .warn(
+          .log(
             _.withLevel(LogLevel.Warn)
               .withMessage("hello")
               .withContext("string")("some_string")
