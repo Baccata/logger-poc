@@ -68,28 +68,28 @@ package object interoplog4cats {
         // WARN
         case (LogLevel.Warn, null, null)         => logger.warn(log.message)
         case (LogLevel.Warn, throwable, null)    => logger.warn(throwable)(log.message)
-        case (LogLevel.Warn, throwable, context) => logger.warn(context.toMap, throwable)(log.message)
         case (LogLevel.Warn, null, context)      => logger.warn(context.toMap)(log.message)
+        case (LogLevel.Warn, throwable, context) => logger.warn(context.toMap, throwable)(log.message)
         // DEBUG
         case (LogLevel.Debug, null, null)         => logger.debug(log.message)
         case (LogLevel.Debug, throwable, null)    => logger.debug(throwable)(log.message)
-        case (LogLevel.Debug, throwable, context) => logger.debug(context.toMap, throwable)(log.message)
         case (LogLevel.Debug, null, context)      => logger.debug(context.toMap)(log.message)
+        case (LogLevel.Debug, throwable, context) => logger.debug(context.toMap, throwable)(log.message)
         // INFO
         case (LogLevel.Info, null, null)         => logger.info(log.message)
         case (LogLevel.Info, throwable, null)    => logger.info(throwable)(log.message)
-        case (LogLevel.Info, throwable, context) => logger.info(context.toMap, throwable)(log.message)
         case (LogLevel.Info, null, context)      => logger.info(context.toMap)(log.message)
+        case (LogLevel.Info, throwable, context) => logger.info(context.toMap, throwable)(log.message)
         // ERROR
         case (LogLevel.Error, null, null)         => logger.error(log.message)
         case (LogLevel.Error, throwable, null)    => logger.error(throwable)(log.message)
-        case (LogLevel.Error, throwable, context) => logger.error(context.toMap, throwable)(log.message)
         case (LogLevel.Error, null, context)      => logger.error(context.toMap)(log.message)
+        case (LogLevel.Error, throwable, context) => logger.error(context.toMap, throwable)(log.message)
         // TRACE
         case (LogLevel.Trace, null, null)         => logger.trace(log.message)
         case (LogLevel.Trace, throwable, null)    => logger.trace(throwable)(log.message)
-        case (LogLevel.Trace, throwable, context) => logger.trace(context.toMap, throwable)(log.message)
         case (LogLevel.Trace, null, context)      => logger.trace(context.toMap)(log.message)
+        case (LogLevel.Trace, throwable, context) => logger.trace(context.toMap, throwable)(log.message)
       }
 
     }
