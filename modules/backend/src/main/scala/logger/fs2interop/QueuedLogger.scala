@@ -34,7 +34,7 @@ object QueuedLogger {
   private[fs2interop] final class Impl[F[_]](
       recordsSink: QueueSink[F, Log]
   ) extends LoggerKernel[F] {
-    def log(record: Log.Builder => Log.Builder): F[Unit] = {
+    def log(level: LogLevel, record: Log.Builder => Log.Builder): F[Unit] = {
       recordsSink.offer(record(Log.mutableBuilder()).build())
     }
   }

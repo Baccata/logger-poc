@@ -9,50 +9,50 @@ package object interoplog4cats {
   def log4catsFrontend[F[_]](logger: LoggerKernel[F]): StructuredLogger[F] =
     new StructuredLogger[F] {
       override def warn(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Warn).withMessage(msg).withThrowable(t).withContextMap(ctx))
+        logger.log(LogLevel.Warn, _.withMessage(msg).withThrowable(t).withContextMap(ctx))
       override def warn(ctx: Map[String, String])(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Warn).withMessage(msg).withContextMap(ctx))
+        logger.log(LogLevel.Warn, _.withMessage(msg).withContextMap(ctx))
       override def warn(t: Throwable)(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Warn).withMessage(message).withThrowable(t))
+        logger.log(LogLevel.Warn, _.withMessage(message).withThrowable(t))
       override def warn(message: => String): F[Unit] =
-        logger.log(_.withMessage(message))
+        logger.log(LogLevel.Warn, _.withMessage(message))
       override def debug(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Debug).withMessage(msg).withThrowable(t).withContextMap(ctx))
+        logger.log(LogLevel.Debug, _.withMessage(msg).withThrowable(t).withContextMap(ctx))
       override def debug(ctx: Map[String, String])(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Debug).withMessage(msg).withContextMap(ctx))
+        logger.log(LogLevel.Debug, _.withMessage(msg).withContextMap(ctx))
       override def debug(t: Throwable)(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Debug).withMessage(message).withThrowable(t))
+        logger.log(LogLevel.Debug, _.withMessage(message).withThrowable(t))
       override def debug(message: => String): F[Unit] =
-        logger.log(_.withMessage(message))
+        logger.log(LogLevel.Debug, _.withMessage(message))
       override def info(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Info).withMessage(msg).withThrowable(t).withContextMap(ctx))
+        logger.log(LogLevel.Info, _.withMessage(msg).withThrowable(t).withContextMap(ctx))
       override def info(ctx: Map[String, String])(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Info).withMessage(msg).withContextMap(ctx))
+        logger.log(LogLevel.Info, _.withMessage(msg).withContextMap(ctx))
       override def info(t: Throwable)(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Info).withMessage(message).withThrowable(t))
+        logger.log(LogLevel.Info, _.withMessage(message).withThrowable(t))
       override def info(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Info).withMessage(message))
+        logger.log(LogLevel.Info, _.withMessage(message))
       override def trace(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Trace).withMessage(msg).withThrowable(t).withContextMap(ctx))
+        logger.log(LogLevel.Trace, _.withMessage(msg).withThrowable(t).withContextMap(ctx))
       override def trace(ctx: Map[String, String])(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Trace).withMessage(msg).withContextMap(ctx))
+        logger.log(LogLevel.Trace, _.withMessage(msg).withContextMap(ctx))
       override def trace(t: Throwable)(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Trace).withMessage(message).withThrowable(t))
+        logger.log(LogLevel.Trace, _.withMessage(message).withThrowable(t))
       override def trace(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Trace).withMessage(message))
+        logger.log(LogLevel.Trace, _.withMessage(message))
       override def error(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Error).withMessage(msg).withThrowable(t).withContextMap(ctx))
+        logger.log(LogLevel.Error, _.withLevel(LogLevel.Error).withMessage(msg).withThrowable(t).withContextMap(ctx))
       override def error(ctx: Map[String, String])(msg: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Error).withMessage(msg).withContextMap(ctx))
+        logger.log(LogLevel.Error, _.withMessage(msg).withContextMap(ctx))
       override def error(t: Throwable)(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Error).withMessage(message).withThrowable(t))
+        logger.log(LogLevel.Error, _.withMessage(message).withThrowable(t))
       override def error(message: => String): F[Unit] =
-        logger.log(_.withLevel(LogLevel.Error).withMessage(message))
+        logger.log(LogLevel.Error, _.withMessage(message))
     }
 
   def log4catsFrontend[F[_]](logger: StructuredLogger[F]): LoggerKernel[F] = new LoggerKernel[F] {
-    def log(record: Log.Builder => Log.Builder): F[Unit] = {
-      val log = record(Log.mutableBuilder()).build()
+    def log(level: LogLevel, record: Log.Builder => Log.Builder): F[Unit] = {
+      val log = record(Log.mutableBuilder().withLevel(level)).build()
       val ctx = log.unsafeContext
       val log4catsContext = locally {
         if (ctx != null) {

@@ -7,8 +7,17 @@ import logger._
 import logger.fs2interop._
 import logger.frontend.Logger
 import cats.syntax.all._
+import logger.Log.Builder
+import cats.Monad
 
 object Main extends IOApp {
+  class ThresholdAwareLogger[F[_]: Monad](logThreshold: F[Double], kernel: LoggerKernel[F]) extends LoggerKernel[F] {
+    inline def log(level: LogLevel, record: Builder => Builder): F[Unit] = logThreshold.flatMap { t =>
+      if (level.value < t) Monad[F].unit
+      else (kernel.log(level, record))
+    }
+  }
+
   def run(args: List[String]): IO[ExitCode] =
     QueuedLogger
       .toStdout[IO]()
@@ -23,9 +32,8 @@ object Main extends IOApp {
         // LoggerKernel implementation can decide on the memory layout
         // of the data.
         val loggerKernelCall = logger
-          .log(
-            _.withLevel(LogLevel.Warn)
-              .withMessage("hello")
+          .log(LogLevel.Warn,
+              _.withMessage("hello")
               .withContext("string")("some_string")
               .withContext("int")(1)
               .withThrowable(new Exception("BOOM"))
@@ -47,4 +55,5 @@ object Main extends IOApp {
         loggerKernelCall *> higherLevelLoggerCall
       }
       .as(ExitCode.Success)
+
 }
