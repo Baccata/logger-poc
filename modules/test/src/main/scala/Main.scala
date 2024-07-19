@@ -11,11 +11,15 @@ import logger.Log.Builder
 import cats.Monad
 
 object Main extends IOApp {
-  class ThresholdAwareLogger[F[_]: Monad](logThreshold: F[Double], kernel: LoggerKernel[F]) extends LoggerKernel[F] {
-    inline def log(level: LogLevel, record: Builder => Builder): F[Unit] = logThreshold.flatMap { t =>
-      if (level.value < t) Monad[F].unit
-      else (kernel.log(level, record))
-    }
+  class ThresholdAwareLogger[F[_]: Monad](
+      logThreshold: F[Double],
+      kernel: LoggerKernel[F]
+  ) extends LoggerKernel[F] {
+    def log(level: LogLevel, record: Builder => Builder): F[Unit] =
+      logThreshold.flatMap { t =>
+        if (level.value < t) Monad[F].unit
+        else (kernel.log(level, record))
+      }
   }
 
   def run(args: List[String]): IO[ExitCode] =
@@ -32,8 +36,9 @@ object Main extends IOApp {
         // LoggerKernel implementation can decide on the memory layout
         // of the data.
         val loggerKernelCall = logger
-          .log(LogLevel.Warn,
-              _.withMessage("hello")
+          .log(
+            LogLevel.Warn,
+            _.withMessage("hello")
               .withContext("string")("some_string")
               .withContext("int")(1)
               .withThrowable(new Exception("BOOM"))

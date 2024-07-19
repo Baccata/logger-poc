@@ -14,7 +14,7 @@ object SingleLineRenderer {
   // This is just an example implementation, it's not cross-platform
   def render(log: Log): String = {
     val context = log.context
-    val builder = mutable.StringBuilder()
+    val builder = mutable.StringBuilder.newBuilder
     val colour = log.level match {
       case LogLevel.Info  => AnsiColor.CYAN
       case LogLevel.Warn  => AnsiColor.YELLOW

@@ -2,11 +2,12 @@ package logger
 
 import org.typelevel.log4cats.StructuredLogger
 import scala.concurrent.duration.FiniteDuration
+import org.typelevel.log4cats.{Logger => CatsLogger}
 
 package object interoplog4cats {
 
   // scalafmt: {maxColumn = 120}
-  def log4catsFrontend[F[_]](logger: LoggerKernel[F]): StructuredLogger[F] =
+  def log4catsStructuredFrontend[F[_]](logger: LoggerKernel[F]): StructuredLogger[F] =
     new StructuredLogger[F] {
       override def warn(ctx: Map[String, String], t: Throwable)(msg: => String): F[Unit] =
         logger.log(LogLevel.Warn, _.withMessage(msg).withThrowable(t).withContextMap(ctx))
@@ -50,7 +51,7 @@ package object interoplog4cats {
         logger.log(LogLevel.Error, _.withMessage(message))
     }
 
-  def log4catsFrontend[F[_]](logger: StructuredLogger[F]): LoggerKernel[F] = new LoggerKernel[F] {
+  def log4catsStructuredBackend[F[_]](logger: StructuredLogger[F]): LoggerKernel[F] = new LoggerKernel[F] {
     def log(level: LogLevel, record: Log.Builder => Log.Builder): F[Unit] = {
       val log = record(Log.mutableBuilder().withLevel(level)).build()
       val ctx = log.unsafeContext
@@ -91,9 +92,36 @@ package object interoplog4cats {
         case (LogLevel.Trace, null, context)      => logger.trace(context.toMap)(log.message)
         case (LogLevel.Trace, throwable, context) => logger.trace(context.toMap, throwable)(log.message)
       }
-
     }
   }
+
+  def log4catsBackend[F[_]](logger: CatsLogger[F]): LoggerKernel[F] =
+    if (logger.isInstanceOf[StructuredLogger[F]])
+      log4catsBackend(logger.asInstanceOf[StructuredLogger[F]])
+    else
+      new LoggerKernel[F] {
+        def log(level: LogLevel, record: Log.Builder => Log.Builder): F[Unit] = {
+          val log = record(Log.mutableBuilder().withLevel(level)).build()
+          val ctx = log.unsafeContext
+          (log.level, log.unsafeThrowable) match {
+            // WARN
+            case (LogLevel.Warn, null)      => logger.warn(log.message)
+            case (LogLevel.Warn, throwable) => logger.warn(throwable)(log.message)
+            // DEBUG
+            case (LogLevel.Debug, null)      => logger.debug(log.message)
+            case (LogLevel.Debug, throwable) => logger.debug(throwable)(log.message)
+            // INFO
+            case (LogLevel.Info, null)      => logger.info(log.message)
+            case (LogLevel.Info, throwable) => logger.info(throwable)(log.message)
+            // ERROR
+            case (LogLevel.Error, null)      => logger.error(log.message)
+            case (LogLevel.Error, throwable) => logger.error(throwable)(log.message)
+            // TRACE
+            case (LogLevel.Trace, null)      => logger.trace(log.message)
+            case (LogLevel.Trace, throwable) => logger.trace(throwable)(log.message)
+          }
+        }
+      }
 
   private object stringlyJsonLike extends JsonLike {
     type J = String
