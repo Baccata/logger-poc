@@ -4,6 +4,8 @@
 
 This is not a library. I'm not planning on publishing/maintaining the code under an Maven organisation I control. This is merely a POC to facilitate some discussions around logging interfaces.
 
+Initially discussed here: https://github.com/typelevel/log4cats/discussions/815
+
 ## What the F[_] is this ?
 
 This repository in a reification of some ideas related to how the defacto-standard logging interface of the Typelevel ecosystem could be made much better. The current standard in the TL ecosystem is log4cats, and although it has the merit of existing, the core interfaces it expose suffer from several problems that make it not ideal from both an application-writer point of view, but also from a library-writer point of view.
